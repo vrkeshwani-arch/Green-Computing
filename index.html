@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Green IT Challenge</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: linear-gradient(135deg, #e8f5e9, #e3f2fd);
+      margin: 0;
+      padding: 20px;
+      text-align: center;
+    }
+
+    h1 {
+      color: #2e7d32;
+    }
+
+    .score-board {
+      font-size: 22px;
+      background: #ffffff;
+      display: inline-block;
+      padding: 10px 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      margin-bottom: 15px;
+    }
+
+    .badge {
+      margin-top: 8px;
+      font-weight: bold;
+      color: #1565c0;
+    }
+
+    .section {
+      margin-top: 30px;
+    }
+
+    .game-area {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      flex-wrap: wrap;
+      margin-top: 15px;
+    }
+
+    .draggable {
+      width: 110px;
+      height: 110px;
+      background: #ffffff;
+      border-radius: 15px;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.15);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: grab;
+      font-size: 16px;
+      font-weight: 500;
+    }
+
+    .target {
+      width: 130px;
+      height: 130px;
+      border: 3px dashed #555;
+      border-radius: 15px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      background: #f9f9f9;
+    }
+
+    .tip-box {
+      margin-top: 20px;
+      background: #fffde7;
+      padding: 15px;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+  </style>
+</head>
+<body>
+
+<h1>🌱 Green IT Challenge</h1>
+
+<div class="score-board">
+  Eco Score: <span id="score">0</span>
+  <div id="badge" class="badge"></div>
+</div>
+
+<div class="section">
+  <h2>♻️ Level 1: E‑Waste Sorting</h2>
+  <p>Drag the items into the correct bins</p>
+
+  <div class="game-area">
+    <div class="draggable" draggable="true" id="oldPhone">📱 Old Phone</div>
+    <div class="draggable" draggable="true" id="banana">🍌 Banana</div>
+  </div>
+
+  <div class="game-area">
+    <div class="target" id="recycleBin">♻️ Recycle</div>
+    <div class="target" id="trashBin">🗑️ Trash</div>
+    <div class="target" id="donateBox">📦 Donate</div>
+  </div>
+</div>
+
+<div class="section">
+  <h2>⚡ Level 2: Choose Clean Energy</h2>
+  <p>Power devices using greener energy</p>
+
+  <div class="game-area">
+    <div class="draggable" draggable="true" id="solar">☀️ Solar</div>
+    <div class="draggable" draggable="true" id="grid">⚡ Grid</div>
+    <div class="draggable" draggable="true" id="coal">🔥 Coal</div>
+  </div>
+
+  <div class="game-area">
+    <div class="target" id="device1">💻 Device A</div>
+    <div class="target" id="device2">💻 Device B</div>
+  </div>
+</div>
+
+<div class="tip-box" id="tipBox">
+  🌍 Tip: Recycling e‑waste prevents toxic metals from harming soil and water.
+</div>
+
+<audio id="correctSound" src="correct.mp3"></audio>
+<audio id="wrongSound" src="wrong.mp3"></audio>
+<audio id="levelSound" src="levelup.mp3"></audio>
+
+<script>
+let score = 0;
+const scoreEl = document.getElementById('score');
+const badgeEl = document.getElementById('badge');
+const tipBox = document.getElementById('tipBox');
+
+function updateScore(points, message) {
+  score += points;
+  scoreEl.textContent = score;
+  tipBox.textContent = '🌍 ' + message;
+
+  if (points > 0) {
+    document.getElementById('correctSound').play();
+  } else {
+    document.getElementById('wrongSound').play();
+  }
+
+  if (score >= 50 && badgeEl.textContent === '') {
+    badgeEl.textContent = '🏆 Badge Unlocked: Green Champion';
+    document.getElementById('levelSound').play();
+  }
+}
+
+function allowDrop(e) {
+  e.preventDefault();
+}
+
+function drag(e) {
+  e.dataTransfer.setData('text', e.target.id);
+}
+
+function drop(e) {
+  e.preventDefault();
+  const item = e.dataTransfer.getData('text');
+  const target = e.target.id;
+
+  // E‑waste logic
+  if (target === 'recycleBin' && item === 'oldPhone') {
+    updateScore(10, 'Correct! Phones should be recycled as e‑waste.');
+  } else if (target === 'trashBin' && item === 'banana') {
+    updateScore(10, 'Correct! Organic waste belongs in trash/compost.');
+  } else if (target === 'donateBox' && item === 'oldPhone') {
+    updateScore(5, 'Good! Reusing devices reduces e‑waste.');
+  }
+
+  // Energy logic
+  else if ((target === 'device1' || target === 'device2') && item === 'solar') {
+    updateScore(15, 'Excellent! Solar energy is clean and renewable.');
+  } else if ((target === 'device1' || target === 'device2') && item === 'grid') {
+    updateScore(5, 'Grid power is better when combined with renewables.');
+  } else if ((target === 'device1' || target === 'device2') && item === 'coal') {
+    updateScore(-10, 'Coal increases carbon footprint. Avoid it!');
+  } else {
+    updateScore(-5, 'Wrong choice. Think green 🌱');
+  }
+}
+
+// Event bindings
+document.querySelectorAll('.draggable').forEach(el => {
+  el.addEventListener('dragstart', drag);
+});
+
+['recycleBin','trashBin','donateBox','device1','device2'].forEach(id => {
+  const target = document.getElementById(id);
+  target.addEventListener('dragover', allowDrop);
+  target.addEventListener('drop', drop);
+});
+</script>
+
+</body>
+</html>
